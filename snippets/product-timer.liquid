@@ -1,0 +1,97 @@
+{% assign timer_flag = true %}
+{% if settings.disable_timer_regular_price %}
+  {% unless product.compare_at_price > product.price %}
+  	{% assign timer_flag = false %}
+  {% endunless %}
+{% endif %}
+
+{% if product.available %}
+  {% if section.settings.enable_countdown_timer %}
+    {% if timer_flag %}    
+      <div class="timer_adjustment">
+
+        {% assign tg = 'show' %}
+        {% if settings.disable_timer_use_tag %}
+        {% for tag in product.tags %}
+        {% if "no-timer" == tag %}
+        {% assign tg = 'hide' %}
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+        <div class="counter_box {{ tg }}">
+          <input type="hidden" class="timer_time" value="{{ settings.enable_timer_stg_custom }}" />
+          {% if section.settings.enable_countdown_timer %}
+
+          {% if settings.enable_timer_stg == 'enable_timer_custom' %}          
+
+          {% if settings.enable_inventory_stock_number == "enable_stock_number_random" %}
+
+
+          {% assign leftNumber='' %}
+          <input type="hidden" id="stock_left_num" class="cookies_Left_number stock_left_num" value="" />
+
+          {% else %}
+
+          <input type="hidden" id="stock_left_num" class="cookies_Left_number stock_left_num" value="{{ leftNumber }}" />
+          {% assign total = 0 %}
+          {% assign infinity = false %}
+          {% for variant in product.variants %}
+          {% if variant.inventory_management != 'shopify' %}
+          {% assign infinity = true %}
+          {% elsif infinity == false %}
+          {% capture temp %}{{ total | plus: variant.inventory_quantity }}{% endcapture %}
+          {% assign total = temp %}
+          {% endif %}
+          {% endfor %}
+
+
+          {% if infinity == true %}
+          {% assign leftNumber = '130' %}
+          {% elsif total == 0 %}
+          {% assign leftNumber = '1' %}
+          {% else %}
+          {% assign leftNumber = total %}
+          {% endif %}
+
+          {% endif %}
+
+          <input type="hidden" class="timer_time" value="{{settings.enable_timer_stg_custom}}" />
+          <input type="hidden"  class="total_stock_left_num" value="{{leftNumber}}" />
+          <input type="hidden" id="stock_left_num" class="stock_left_num" value="{{ leftNumber }}" />
+          <input type="hidden"  id="stock_final_num" value="{{ leftNumber }}" />
+
+          {% include 'set_cookies' %} 	
+          {% include 'product_count_24m' %}
+
+          {% else %} 
+
+          <input type="hidden" id="myMinute" class="timer_time" value="" />
+          <input type="hidden" id="myLeftnum" class="stock_left_num" value="" />
+          <input type="hidden"  id="stock_final_num" value="" />
+
+          <script>
+
+            // for minute
+            var myMinute = ['10','15', '20', '25', '30', '45','60','90','120','180','300','420','600','720'];    
+
+            var randMinute = Math.floor(Math.random() * myMinute.length);
+
+            var currentMinute = myMinute[randMinute];
+            document.getElementById("myMinute").value =currentMinute*60;
+
+
+          </script>
+
+          {% include 'product_count_random' %}
+
+          {% endif %}
+
+          {% endif %}
+          <h5>{{ section.settings.countdown_timer_text }}</h5>
+        </div>
+
+      </div>   
+    {% endif %}
+  {% endif %}
+{% endif %}

@@ -1,0 +1,646 @@
+{% if section.settings.show_breadcrumb %}
+{% include 'breadcrumbs' %}
+{% endif %}
+
+<div itemscope itemtype="http://schema.org/Product" id="ProductSection-{{ section.id }}" data-section-id="{{ section.id }}" data-section-type="product" data-enable-history-state="true">
+  <meta itemprop="name" content="{{ product.title }}">
+  <meta itemprop="url" content="{{ shop.url }}{{ product.url }}">
+  <meta itemprop="image" content="{{ product.featured_image.src | img_url: '800x' }}">
+
+  {% comment %}
+  Get first variant, or deep linked one
+  {% endcomment %}
+  {% assign featured_img_src = current_variant.featured_image.src | default: product.featured_image.src -%}
+  {% assign featured_img_alt = current_variant.featured_image.alt | default: product.featured_image.alt -%}
+  {% assign current_variant = product.selected_or_first_available_variant -%}
+  {% assign enable_zoom = section.settings.enable_image_zoom -%}
+  {% capture saved_amount %}{{ product.compare_at_price | minus: product.price | money_without_trailing_zeros }}{% endcapture %} 	
+  <!-- PRODUCT DETAIL -->
+  
+  <section class="product-detail-section">
+    <div class="container">
+      <div class="row">
+        <div class="product-detail">
+          <div class="col-lg-6 col-xs-12">
+            <div class="product-slider-part">
+              <ul class="slider-for">
+                {% for image in product.images %}
+                <li>
+                  <img id="ProductPhotoImg" 
+                       src="{{ image.src | img_url: '575x575' }}" 
+                       alt="{{ featured_image.alt | escape }}" 
+                       {% if enable_zoom %}class="img-zoom-{{ forloop.index0 }}"{% endif %}>
+                </li>
+                {% endfor %}
+              </ul>
+              {% if product.images.size > 1 %}
+                <ul class="slider-nav">         
+                 {% for image in product.images %}                  
+                  <li><img src="{{ image | img_url: '120x120' }}" alt="{{ image.alt | escape }}" /></li>                                   
+                  {% endfor %}
+                </ul>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-lg-6 col-xs-12">
+            
+            <div class="product-detail-part">
+              <h2 itemprop="name">{{ product.title }}</h2>
+              <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                
+                <meta itemprop="priceCurrency" content="{{ shop.currency }}">
+                <link itemprop="availability" href="http://schema.org/{% if product.available %}InStock{% else %}OutOfStock{% endif %}">
+                
+                <span id="product_price" itemprop="price" content="{{ current_variant.price | divided_by: 100.00 }}">{{ current_variant.price | money }}</span>
+                
+                {% if current_variant.compare_at_price > current_variant.price and section.settings.show_compare_at_price == true %}
+                <span id="product_compare_price" class="discount-price">{{ current_variant.compare_at_price | money }}</span> 
+                <span class="save-price">SAVE {{ saved_amount }}</span>
+                {% endif %}
+             
+                <form action="/cart/add" method="post" enctype="multipart/form-data" id="AddToCartForm_id">
+                  <select name="id" id="productSelect" class="product-single__variants" style="display: none !important;">
+                    {% for variant in product.variants %}
+                    {% if variant.available %}
+                    <option {% if variant == product.selected_or_first_available_variant %} selected="selected" {% endif %} data-sku="{{ variant.sku }}" value="{{ variant.id }}">{{ variant.title }} - {{ variant.price | money_with_currency }}</option>
+                    {% else %}
+                    <option disabled="disabled">
+                      {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                  </select>                    
+                  {% if section.settings.show_quantity_selector %}
+                  <h3 class="prod_qty"><span>Quantity</span>
+                    <ul class="QuantityBox">
+                      <li class="minus-box"> <a href="javascript:void(0)" class="minus produ_qty"> <em class="fa fa-minus"></em> </a> </li>
+                      <li class="input-box">
+                        <input type="text" id="Quantity" name="quantity" value="1" min="1" class="QuantityInput" pattern="[0-9]*" readonly>
+                      </li>
+                      <li class="plus-box"> <a href="javascript:void(0)" class="plus produ_qty"> <em class="fa fa-plus"></em> </a> </li>
+                    </ul>
+                  </h3>
+                  {% endif %}  
+                  
+                  {% include 'product-page-features' %}
+
+                  {% if section.settings.enable_visitor_count %}                  
+                  <h6 class="fake_counter_p">Real time <span><b id="dynamic_counter">  </b></span> Visitors right now</h6>
+                  <script type="text/javascript">
+                    /* Rendomly number avialable user on current page */ 
+                    jQuery(function($) {
+                      var min = 10;
+                      var max = 300;
+                      min = Math.ceil(min);
+                      max = Math.floor(max);
+                      var  r =  Math.floor(Math.random() * (max - min + 1)) + min;
+                      var inc = '0' ;
+                      var mytimeAgo = ['1', '2', '3', '4', '5','10', '-1', '-2', '-3', '-4', '-5'];
+                      var randomlytimeAgo='';
+                      var currentmytimeAgo='';
+                      var plus = ['10', '20', '15'];
+                      var randomlytimeAgo='';
+                      var currentmytimeAgo='';
+                      var range='';
+                      setInterval(function(){  
+                        randomlytimeAgo =  Math.floor(Math.random() * mytimeAgo.length); 
+                        currentmytimeAgo = mytimeAgo[randomlytimeAgo];
+                        r = parseInt(r)+parseInt(currentmytimeAgo) ; 
+                        if(r <=10 ){
+                          range =  Math.floor(Math.random() * plus.length);  
+                          var final =  plus[range];
+                          r=r+final;
+                        }
+                        if(r>300){
+                          range =  Math.floor(Math.random() * plus.length);  
+                          var final =  plus[range];
+                          r=r-final;
+                        }
+                        jQuery("#dynamic_counter").html(r); 
+                      }, 2000);
+                    });
+                  </script>
+                  {% endif %}                
+                  
+                </form>
+               </div>
+            </div>
+          
+            <div class="desc_div_contain">
+            {{ product.description }}
+            </div>  
+            
+            <div class="visa-section">              
+              {% if section.settings.trust_image_below_description %}
+              <img src="{{ section.settings.trust_image_below_description | img_url:'400x' }}">
+              {% endif %}
+            </div>
+            <div class="product-sharing">
+              {% if section.settings.enable_sharing_buttons %}
+              {% include 'product-social-sharing', share_title: product.title, share_permalink: product.url, share_image: product %}
+              {% endif %}                    
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  {% if section.settings.enable_related_items %}
+  {% include 'related-products' %}
+  {% endif %}
+  
+</div>
+
+{% unless product == empty %}
+  <script type="application/json" id="ProductJson-{{ section.id }}">
+    {{ product | json }}
+  </script>
+{% endunless %}
+
+<!-- enable random number-->
+
+{% if  section.settings.enable_stock_bar and settings.enable_inventory_stock_number == "enable_stock_number_random"%}
+<script>
+  // for stock left number
+  var myLeftnum = ['3','4', '5', '6', '7', '8','9','10','11','12'];    
+  var randLeftnum = Math.floor(Math.random() * myLeftnum.length);
+  var currentLeftnum = myLeftnum[randLeftnum];
+
+  document.getElementById("stock_left_num").value= currentLeftnum;
+  document.getElementById("stock_final_num").value= currentLeftnum;
+  document.getElementById("counter_left").innerHTML= currentLeftnum;
+ 
+  //alert(currentLeftnum);
+</script>
+
+{% endif %} 
+
+{% if product.variants.size > 1 %}
+<script type="text/javascript">
+  var variantImages = {},
+      thumbnails,
+      variant,
+      variantImage,
+      optionValue,
+      productOptions = [];
+  {% for variant in product.variants %}
+  variant = {{ variant | json }};
+  if ( typeof variant.featured_image !== 'undefined' && variant.featured_image !== null ) {
+    variantImage =  variant.featured_image.src.split('?')[0].replace(/http(s)?:/,'');
+    variantImages[variantImage] = variantImages[variantImage] || {};
+    {% for option in product.options %}
+
+    {% assign option_value = variant.options[forloop.index0] %}
+    {% assign option_key = 'option-' | append: forloop.index0 %}
+
+    if (typeof variantImages[variantImage][{{ option_key | json }}] === 'undefined') {
+      variantImages[variantImage][{{ option_key | json }}] = {{ option_value | json }};
+    }
+    else {
+      var oldValue = variantImages[variantImage][{{ option_key | json }}];
+      if ( oldValue !== null && oldValue !== {{ option_value | json }} )  {
+          variantImages[variantImage][{{ option_key | json }}] = null;
+          }
+          }
+          {% endfor %}
+          }
+          productOptions.push(variant);
+      {% endfor %}
+
+      $(document).ready(function() {
+        thumbnails = $('img[src*="/products/"]').not(':first');
+        if (thumbnails.length) {
+          thumbnails.bind('click', function() {
+            var arrImage = $(this).attr('src').split('?')[0].split('.');
+            var strExtention = arrImage.pop();
+            var strRemaining = arrImage.pop().replace(/_[a-zA-Z0-9@]+$/,'');
+            var strNewImage = arrImage.join('.')+"."+strRemaining+"."+strExtention;
+            if (typeof variantImages[strNewImage] !== 'undefined') {
+              productOptions.forEach(function (value, i) {
+                optionValue = variantImages[strNewImage]['option-'+i];
+                if (optionValue !== null && $('.single-option-selector:eq('+i+') option').filter(function() { return $(this).text().trim() === optionValue }).length) {
+                  $('.single-option-selector:eq('+i+')').val(optionValue).trigger('change');                 
+                }
+              });
+            }
+          });
+          
+          $('.slider-for').on('afterChange', function(event, slick, currentSlide, nextSlide){
+            var arrImage = $('.product-slider-part .slick-current').find('img');
+            arrImage = arrImage.attr('src').split('?')[0].split('.');
+            var strExtention = arrImage.pop();
+            var strRemaining = arrImage.pop().replace(/_[a-zA-Z0-9@]+$/,'');
+            var strNewImage = arrImage.join('.')+"."+strRemaining+"."+strExtention;
+            if (typeof variantImages[strNewImage] !== 'undefined') {
+              productOptions.forEach(function (value, i) {
+                optionValue = variantImages[strNewImage]['option-'+i];
+                if (optionValue !== null && $('.single-option-selector:eq('+i+') option').filter(function() { return $(this).text().trim() === optionValue }).length) {
+                  $('.single-option-selector:eq('+i+')').val(optionValue).trigger('change');                 
+                }
+              });
+            }
+          });
+        }
+      });
+</script> 
+{% endif %}
+
+<script type="text/javascript">
+   
+  var selectCallback = function(variant, selector){
+ 
+    if (variant && variant.available == true){
+      var shop_curr = '{{shop.money_format}}';
+      // selected a valid variant
+      jQuery('#AddToCartForm_id .cart-btn').removeClass('disabled').removeAttr('disabled');
+      jQuery('#product_price').html(Shopify.formatMoney(variant.price, shop_curr));
+      jQuery('#product_compare_price').html(Shopify.formatMoney(variant.compare_at_price, shop_curr));
+      var save_price = ((variant.compare_at_price)-(variant.price));
+      jQuery('.save-price').html( 'SAVE '+ Shopify.formatMoney( save_price, shop_curr ));      
+      jQuery('.product_sku_cls').html(variant.sku);
+      jQuery('.on_stock').html(variant.inventory_quantity);
+      jQuery('#AddToCartForm_id .cart-btn').text('Add to cart');  
+            
+    } 
+    else{
+      // variant doesn't exist
+      jQuery('#AddToCartForm_id .cart-btn').addClass('disabled').attr('disabled', 'disabled');
+      var message = variant ? "Sold Out" : "Unavailable";
+      jQuery('.product_sku_cls').html(variant.sku);
+      jQuery('.on_stock').html('NO');
+      jQuery('#AddToCartForm_id .cart-btn').text(message);
+      jQuery('.save-price').hide();
+      
+    }
+ 
+    // END SWATCHES
+    if (variant && variant.featured_image){
+      var originalImage = $(".slider-for .slick-active img");
+      var newImage = variant.featured_image;
+      var element = originalImage[0];
+      Shopify.Image.switchImage(newImage, element, function (newImageSizedSrc, newImage, element){
+        $(".slider-for li").each(function(index){
+          var temp_img_src = $(this).find('img').attr('src');
+          var temp_data_index = $(this).attr('data-slick-index');         
+          if(temp_img_src == newImageSizedSrc){
+            $('.slider-for').slick('slickGoTo', temp_data_index);             
+          }
+        });
+      });
+    }
+  };
+  
+  jQuery(function($){
+    new Shopify.OptionSelectors('productSelect',{
+      product: {{ product | json }},
+      onVariantSelected: selectCallback,
+      enableHistoryState: true
+    });
+
+    // Add label if only one product option and it isn't 'Title'. Could be 'Size'.
+    {% if product.options.size == 1 and product.options.first != 'Title' %}
+    var label_text = '{{ product.options.first | escape }}';
+    $('.selector-wrapper:eq(0)').prepend('<label for="productSelect-option-0">'+label_text+'</label>');
+    {% endif %}
+
+    // Hide selectors if we only have 1 variant and its title contains 'Default'.
+    {% if product.variants.size == 1 and product.variants.first.title contains 'Default' %}
+    $('.selector-wrapper').hide();
+    {% endif %}
+    //$('.selector-wrapper').addClass('hide');
+  });
+  
+  if($(window).width() > 991){
+    
+    $('.slider-for').on('afterChange', function(event, slick, currentSlide, nextSlide){
+      var img_url_temp = $(this).find('img').attr('src');
+      var imgs = $('.img-zoom');
+      $('.zoomContainer').remove();
+      imgs.removeData('elevateZoom');
+      imgs.removeData('zoomImage');
+      var temp_zoom_cls = '.img-zoom-'+currentSlide;
+      setTimeout(function(){
+        $(temp_zoom_cls).elevateZoom({
+          zoomType				: "lens",
+          lensShape : "round",
+          lensSize    : 200
+        });
+      }, 100);
+    });
+  }
+
+</script>
+<script type="text/javascript">      
+  
+  if($(window).width() > 991){
+    $( document ).ready(function() {
+      setTimeout(function(){
+        var img_zoom_class = $(".slider-for .slick-active img").attr('class');
+        $('.'+img_zoom_class).elevateZoom({         
+          zoomType				: "lens",
+          lensShape : "round",
+          lensSize    : 200        
+        });
+      }, 100);
+    });
+  }
+  
+  {% if section.settings.enable_floating_ATC_button %}  
+  setTimeout(
+    function(){
+      $('#AddToCartForm_id .cart-btn').clone().addClass('fix-cart-btn').appendTo("body");
+    }, 1000);
+
+  $(document).on('click', '.fix-cart-btn', function(){   
+    $('#AddToCartForm_id .cart-btn').trigger('click');
+  });
+  
+  $(document).ready( function() {
+    var Wwidth = $(window).width();
+    $.fn.is_on_screen = function(){
+      var win = $(window);
+      var viewport = {
+        top : win.scrollTop(),
+        left : win.scrollLeft()
+      };
+      viewport.right = viewport.left + win.width();
+      viewport.bottom = viewport.top + win.height();
+
+      var bounds = this.offset();
+      bounds.right = bounds.left + this.outerWidth();
+      bounds.bottom = bounds.top + this.outerHeight();
+
+      return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+    };
+
+    $(window).on("scroll", function () {
+      if ($(this).scrollTop() > 1000) {
+        $('.fix-cart-btn').show();
+
+        if( $('footer').length > 0 ) {  			
+          if( $('footer').is_on_screen() ) {  			
+            $('.fix-cart-btn').hide();
+          } else {
+            $('.fix-cart-btn').show();
+          }
+        }     
+      } else {
+        $('.fix-cart-btn').hide();
+      }   
+    });
+  });
+  {% endif %}
+</script>
+
+
+{% schema %}
+  {
+    "name": "Product pages",
+    "settings": [ 
+	  {
+        "type": "header",
+        "content": "Countdown Timer"
+      }, 
+	  {
+        "type": "checkbox",
+        "id": "enable_countdown_timer",
+        "label": "Enable Countdown Timer",
+		"default":true
+      },
+	  {
+        "type": "text",
+        "id": "countdown_timer_text",
+        "label": "Countdown Timer Text",
+		"default":"Sale Ends Soon - Get Yours Today!"
+      },	 
+	  {
+        "type": "header",
+        "content": "Stock Bar"
+      }, 
+	  {
+        "type": "checkbox",
+        "id": "enable_stock_bar",
+        "label": "Enable Stock Bar",
+		"default":true
+      },
+	  {
+        "type": "text",
+        "id": "stock_bar_text_left",
+        "label": "Stock Bar Text Left",
+		"default":"Hurry! Only "
+      },	 
+	  {
+        "type": "text",
+        "id": "stock_bar_text_right",
+        "label": "Stock Bar Text Right",
+		"default":" left in stock!"
+      },
+	  {
+        "type": "header",
+        "content": "ATC Button"
+      }, 
+	  {
+        "type": "text",
+        "id": "ATC_button_text",
+        "label": "ATC Button Text",
+		"default":"Add to cart"
+      },
+	  {
+        "type": "checkbox",
+        "id": "enable_floating_ATC_button",
+        "label": "Enable Floating ATC Button",
+		"info":"This enables a full-width ATC button on scroll",
+		"default": true
+      },
+	  {
+        "type": "image_picker",
+        "id": "trust_badge_below_ATC_button",
+        "label": "Trust Badge Below ATC Button"
+      },
+	  {
+        "type": "header",
+        "content": "Visitor Count"
+      }, 
+	  {
+        "type": "checkbox",
+        "id": "enable_visitor_count",
+        "label": "Enable Visitor Count",		
+		"default": true
+      },
+	  {
+        "type": "header",
+        "content": "Order Of Elements"
+      },
+	  {
+        "type": "select",
+        "id": "first_element",
+        "label": "First Element",
+	    "default": "ATC_btn",
+	    "options":[
+          {
+            "value": "ATC_btn",
+            "label": "ATC"
+          },
+	      {
+            "value": "stock_bar",
+            "label": "Stock Bar"
+          },
+	      {
+            "value": "timer",
+            "label": "Timer"
+          }
+		]
+      },
+	  {
+        "type": "select",
+        "id": "secound_element",
+        "label": "Second Element",
+	    "default": "stock_bar",
+	    "options":[
+          {
+            "value": "ATC_btn",
+            "label": "ATC"
+          },
+	      {
+            "value": "stock_bar",
+            "label": "Stock Bar"
+          },
+	      {
+            "value": "timer",
+            "label": "Timer"
+          }
+		]
+      },
+	  {
+        "type": "select",
+        "id": "third_element",
+        "label": "Third Element",
+        "default": "timer",
+	    "options":[
+          {
+            "value": "ATC_btn",
+            "label": "ATC"
+          },
+	      {
+            "value": "stock_bar",
+            "label": "Stock Bar"
+          },
+	      {
+            "value": "timer",
+            "label": "Timer"
+          }
+		]
+      },
+	  {
+        "type": "header",
+        "content": "Sharing"
+      },
+	  {
+        "type": "checkbox",
+        "id": "enable_sharing_buttons",
+        "label": "Enable Sharing Buttons",
+        "default": true
+      },
+	  {
+        "type": "checkbox",
+        "id": "share_facebook",
+        "label": "Share on Facebook",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "share_twitter",
+        "label": "Tweet on Twitter",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "share_pinterest",
+        "label": "Pin on Pinterest",
+        "default": true
+      },
+	  {
+        "type": "checkbox",
+        "id": "share_reddit",
+        "label": "Reddit Share",
+        "default": true
+      },
+	  {
+        "type": "checkbox",
+        "id": "share_google",
+        "label": "Google+ Share",
+        "default": true
+      },
+	  {
+        "type": "header",
+        "content": "Trust Badge"
+      },
+	  {
+        "type": "image_picker",
+        "id": "trust_image_below_description",
+        "label": "Trust Image Below Description"
+      },
+	  {
+        "type": "header",
+        "content": "General"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_image_zoom",
+        "label": "Enable Image Zoom",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_related_items",
+        "label": "Enable Related Items",
+        "default": true
+      },
+	  {
+        "type":"text",
+        "id":"related_items_title",
+        "label":"Related Items Title",
+		"default":"You'll Also Love These"
+      },
+	  {
+        "type":"select",
+        "id":"related_total",
+		"label": "Total Product",
+        "default": "6",
+        "options": [
+         {
+         	"value": "6",
+            "label": "6"
+         },
+         {
+            "value": "8",
+            "label": "8"
+         },
+		 {
+            "value": "10",
+            "label": "10"
+         }
+       ]
+      },
+      {
+        "type": "checkbox",
+        "id": "show_quantity_selector",
+        "label": "Show Quantity Selector",
+        "default": true
+      },        
+	  {
+        "type": "checkbox",
+        "id": "show_compare_at_price",
+        "label": "Show Compare At Price",
+		"default":true
+      },
+	  {
+        "type": "checkbox",
+        "id": "show_breadcrumb",
+        "label": "Show Breadcrumb",
+		"default":true
+      }
+    ]
+  }
+{% endschema %}

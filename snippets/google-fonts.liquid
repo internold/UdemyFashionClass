@@ -1,0 +1,25 @@
+{% if settings.title_font != blank %}
+  {% capture title_font_family %}{{ settings.title_font }}:100,100i,300,300i,400,400i,500,500i,700,700i,900i{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: title_font_family | stylesheet_tag }}
+{% endif %}
+
+{% if settings.description_font != blank %}
+  {% capture description_font_family %}{{ settings.description_font }}:100,100i,300,300i,400,400i,500,500i,700,700i,900i{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: description_font_family | stylesheet_tag }}
+{% endif %}
+
+{% if settings.button_font != blank %}
+  {% capture button_font_family %}{{ settings.button_font }}:100,100i,300,300i,400,400i,500,500i,700,700i,900i{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: button_font_family | stylesheet_tag }}
+{% endif %}
+
+{% if settings.menu_font != blank %}
+  {% capture menu_font_family %}{{ settings.menu_font }}:100,100i,300,300i,400,400i,500,500i,700,700i,900i{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: menu_font_family | stylesheet_tag }}
+{% endif %}
+
+{% if settings.all_other_fonts != blank %}
+  {% capture all_other_fonts_family %}{{ settings.all_other_fonts }}:100,100i,300,300i,400,400i,500,500i,700,700i,900i{% endcapture %}
+  {{ '//fonts.googleapis.com/css?family=' | append: all_other_fonts_family | stylesheet_tag }}
+{% endif %}
+

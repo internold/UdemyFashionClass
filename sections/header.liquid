@@ -1,0 +1,168 @@
+<!-- MOBILE MENU -->
+<div class="side-menu sidebar-inverse">
+  <nav class="navbar navbar-default">
+    <div class="side-menu-container">
+      <div class="navbar-header">
+        <h4>
+          <a href="/" style="max-width:{{ settings.desktop_logo_width }}px;">
+            <img src="{% if settings.mobile_logo.size > 0 %}{{ settings.mobile_logo | img_url: 'master' }}{% else %}{{ 'dropshipthemelogo.png' | asset_url }}{% endif %}" alt="{{ settings.mobile_logo.alt }}" style="max-width:{{ settings.mobile_logo_width }};">
+          </a>
+        </h4>
+        <button class="close-nav">X</button>
+      </div>
+      {% include 'site-nav' %}      
+    </div>
+    <!-- /.navbar-collapse --> 
+  </nav>
+</div>
+
+<!-- NAV BAR -->
+<div class="nav-bar-section {% if section.settings.hide_top_strip_on_mobile %}show_desktop{% endif %}">
+  <div class="container">
+    <div class="nav-bar-part">
+      <div class="nav-bar-wrap">
+        <p>{{ section.settings.announcement_text }}</p>
+      </div>
+      <div class="nav-bar-wrap">
+        <p class="text-right">
+          <a href="{{ section.settings.contact_link }}">{{ section.settings.contact_text }}</a>
+          {% if shop.customer_accounts_enabled %}
+          {% if customer %}
+          <a href="/account">Account</a>
+          <a href="/account/logout">Logout</a>
+          {% else %}
+          <a href="/account/register">Register</a>
+          <a href="/account/login">Login</a>	
+          {% endif %}
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- HEADER -->
+<header>
+  <div class="nav-section WFwrap">
+    <div class="container">
+      <div class="header-section">
+        <div class="col-md-3 col-xs-12">
+          <div class="header-logo">
+            <figure>
+              <a href="/" style="max-width:{{ settings.desktop_logo_width }}px;">
+                <img src="{% if settings.desktop_logo.size > 0 %}{{ settings.desktop_logo | img_url: 'master' }}{% else %}{{ 'dropshipthemelogo.png' | asset_url }}{% endif %}" alt="{{ settings.desktop_logo.alt }}" class="show_desktop" style="max-width:{{ settings.desktop_logo_width }}px;">
+                <img src="{% if settings.mobile_logo.size > 0 %}{{ settings.mobile_logo | img_url: 'master' }}{% else %}{{ 'dropshipthemelogo.png' | asset_url }}{% endif %}" alt="{{ settings.mobile_logo.alt }}" class="show_mobile" style="max-width:{{ settings.mobile_logo_width }};">
+              </a>
+            </figure>
+          </div>
+        </div>
+        <div class="col-md-9 col-xs-12">
+          <div class="header-search">
+            <div class="menu-icon">
+              <div id="nav-icon"> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> </div>
+            </div>
+            <ul>
+              <li id="search-form">
+                <div class="search-part">
+                  <form action="/search" method="get">
+                    <input type="text" name="q" placeholder="Search Our Store...">
+                    {% include 'wc-icon-search' %}
+                  </form>
+                </div>
+              </li>
+              <li id="search"><a href="#">{% include 'wc-icon-search' %}</a></li>  
+              {% if shop.customer_accounts_enabled %}
+              <li id="user"><a href="#">{% include 'wc-icon-user' %}</a>              
+                <ul class="acount-ul">
+                  {% if customer %}
+                  <li><a href="/account">Account</a></li>
+                  <li><a href="/account/logout">Logout</a></li>
+                  {% else %}
+                  <li><a href="/account/register">Register</a></li>
+                  <li><a href="/account/login">Login</a></li>	
+                  {% endif %}
+                </ul>
+              </li>
+              {% endif %}
+              <li><a href="/cart">
+                <em>{% include 'wc-icon-cart' %}</em>
+                <span class="count_item cart_qty_cls">{{cart.item_count}}</span>
+                <span>
+                  <span class="cart-txt">MY CART</span><span class="cart-item-txt">(<i class="cart_qty_cls">{{cart.item_count}}</i> Items)</span>
+                </span>
+                <div class="subToggle" id="CartContainer"></div>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-part WFwrap grid-mobile-none {% unless section.settings.enable_menu_fix_on_scroll %}no-stickytop{% endunless %}">
+    <div class="container">
+      {% include 'site-nav' %}      
+    </div>
+  </div>
+  <!-- MOBILE SEARCH -->
+  <div class="mobile-search WFwrap">
+    <div class="search-part">
+      <form action="/search" method="get">
+        <input type="text" name="q" placeholder="Search Our Store...">
+        <button type="submit" class="btn">search</button>
+      </form>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+  {
+    "name": "Header",
+    "settings": [	  
+      {
+        "type": "header",
+        "content": "Top Strip"
+      },          
+      {
+        "type": "text",
+        "id": "announcement_text",
+        "label": "Announcement text",
+        "default": "LAUNCH SPECIAL: FREE SHIPPING WORLDWIDE!"
+      },
+      {
+        "type": "text",
+        "id": "contact_text",
+        "label": "Contact Text",
+        "default":"Need Help? support@yourstore.com"
+      },
+	  {
+        "type": "text",
+        "id": "contact_link",
+        "label": "Contact Link"
+      },
+	  {
+        "type": "checkbox",
+        "id": "hide_top_strip_on_mobile",
+        "label": "Hide Top Strip On Mobile",
+        "default": true
+      },  
+      {
+        "type": "header",
+        "content": "Header Menu"
+      },     
+      {
+        "type": "link_list",
+        "id": "main_linklist",
+        "label": "Header Menu",
+        "default": "main-menu"
+      },
+	  {
+        "type": "checkbox",
+        "id": "enable_menu_fix_on_scroll",
+        "label": "Enable menu fix on scroll",
+        "default": false
+      }
+    ]
+  }
+{% endschema %}

@@ -1,0 +1,7 @@
+<button type="submit" class="cart-btn {% if settings.cart_option == 'popup_cart' %}add_to_cart_btn_cls{% endif %}" name="add">
+  {{ section.settings.ATC_button_text }}
+</button>
+
+{% if section.settings.trust_badge_below_ATC_button %}
+<figure class="atc_badge"><img src="{% if section.settings.trust_badge_below_ATC_button.size > 0 %}{{ section.settings.trust_badge_below_ATC_button | img_url: '300x' }}{% else %}{{ 'dropship-theme-safe.png' | asset_url }}{% endif %}"></figure>
+{% endif %}

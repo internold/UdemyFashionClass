@@ -1,0 +1,128 @@
+<!--prouct-count-->
+{% assign first_element = section.settings.first_element %}
+{% assign secound_element = section.settings.secound_element %}
+{% assign third_element = section.settings.third_element %}
+
+{% if first_element == 'ATC_btn' %}
+	{% include 'product-addtocart' %}
+{% elsif first_element == 'stock_bar' %}
+	{% include 'product-progress-bar' %}
+{% else %}
+	{% include 'product-timer' %}
+{% endif %}
+
+{% if secound_element == 'ATC_btn' %}
+	{% include 'product-addtocart' %}
+{% elsif secound_element == 'stock_bar' %}
+	{% include 'product-progress-bar' %}
+{% else %}
+	{% include 'product-timer' %}
+{% endif %}
+
+{% if third_element == 'ATC_btn' %}
+	{% include 'product-addtocart' %}
+{% elsif third_element == 'stock_bar' %}
+	{% include 'product-progress-bar' %}
+{% else %}
+	{% include 'product-timer' %}
+{% endif %}
+
+<!-- for script only  cookies based invetory left number -->
+{% if settings.enable_inventory_stock_number == "enable_inventory_stock_number_with_not_desc"  %}
+
+<script type="text/javascript">
+
+  setTimeout(function() {
+    
+    var second_db=$(".timer_time").val()-4;
+    if( $("#stock_left_num").val() < 12 ) {
+      var left_number = $("#stock_left_num").val();
+    } else{
+      var left_number = 12;
+    }        
+    var counter_number=second_db/left_number;
+    var counter_number_sec=counter_number*1000;
+    var stop = 0;
+  
+    function decrease(){  
+      var percent = $('#counter_left').text(); 
+      if(percent > stop){
+        $('#counter_left').text(percent);  
+        var t = setTimeout(decrease,counter_number_sec);
+      } else{
+        $('#counter_left').text(0);
+      } 
+    }
+    
+    setTimeout(decrease,counter_number_sec); // mini seconds
+    function progress(timeleft, timetotal, $element) {
+
+      var elementWidth = left_number*100/12 ;   
+      var progressBarWidth = (timeleft * elementWidth / timetotal) + '%';      
+
+      if( $('#counter_left').text() < 12 ) {
+        var totalleftnumber = $('#counter_left').text()*100/12 + '%';
+      } else{
+        var totalleftnumber = 100 + '%';
+      }
+	       
+      //console.log('totalleftnumber = ' + totalleftnumber + '  progressBarWidth = ' + progressBarWidth);	 
+
+      $element.find('div').animate({ width:totalleftnumber  }, 0).html(timeleft);
+      if(timeleft > counter_number) {
+        setTimeout(function() {
+          progress(timeleft - counter_number, timetotal, $element);
+        }, timetotal);
+      }
+    };
+    progress(second_db, second_db, $('#progressBar'));
+    $("#progressBar").removeClass("progress-bar-success");
+  }, 2000);
+
+</script>
+
+{% else %}
+
+<script type="text/javascript">
+  
+  setTimeout(function() {
+    var second_db=$(".timer_time").val()-4;
+    var left_number=$("#stock_left_num").val();
+    var final_number= $("#stock_final_num").val();
+
+    var counter_number=second_db/left_number;
+    var counter_number_sec=counter_number*100;
+    var stop = 0;
+    function decrease(){
+    var percent = Number($('#counter_left').text());
+      if(percent > stop){
+
+        $('#counter_left').text(--percent);
+        var t = setTimeout(decrease,counter_number_sec);
+      } else{
+        $('#counter_left').text(0);
+      }
+    }
+    setTimeout(decrease,counter_number_sec); // mini seconds
+
+    function progress(timeleft, timetotal, $element) {
+      
+      var elementWidth = left_number*100/12 ;   
+      var progressBarWidth = (timeleft * elementWidth / timetotal) + '%'; 
+      //var progressBarWidth = timeleft * $element.width() / timetotal;
+      console.log('progressBarWidth = ' + progressBarWidth);
+      
+      $element.find('div').animate({ width: progressBarWidth }, 100).html(timeleft);
+      if(timeleft > counter_number) {
+        setTimeout(function() {
+          progress(timeleft - counter_number, timetotal, $element);
+        }, counter_number_sec);
+      }
+    };
+    progress(second_db, second_db, $('#progressBar'));
+    $("#progressBar").removeClass("progress-bar-success");
+
+  }, 2000);
+ 
+</script>
+{% endif %}
